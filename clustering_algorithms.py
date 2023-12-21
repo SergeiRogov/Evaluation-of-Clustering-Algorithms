@@ -7,34 +7,55 @@ import pprint
 import re
 import os
 
-working_directory = '/Users/macbookair/Documents/UNIC FALL 2023/Machine Learning and Data Mining II/Project'
+# project directory path on a local machine
+working_directory = '/Users/macbookair/Documents/UNIC FALL 2023/Machine Learning and Data Mining II/Evaluation-of-Clustering-Algorithms'
+
+# path to a folder with datasets documents
 datasets = working_directory + '/datasets'
+
+# complete paths to 3 csv-files containing datasets
 countries = datasets + '/Countries/Country-data.csv'
+songs = datasets + '/Songs/spotify_millsongdata.csv'
+customers = datasets + '/Customers/segmentation data.csv'
 
 
-def apply_kmeans(csv_file, num_clusters, doc_type):
+def apply_kmeans(csv_file, num_clusters, dataset_type):
+
     # Read the CSV file
     data = pd.read_csv(csv_file)
-    if doc_type == 1:
-        # Select the relevant columns for clustering
-        data_no_countries = data.iloc[:, 1:]  # Exclude the 'country' column for clustering
+
+    if dataset_type == "countries" or dataset_type == "customers":
+        # Exclude first column since it serves as an identification feature - unique for each instance
+        # 'country' column for Countries dataset
+        # 'ID' column for Customers dataset
+        data_no_id = data.iloc[:, 1:]
 
         # Standardize the data
         scaler = StandardScaler()
-        data_no_countries_scaled = scaler.fit_transform(data_no_countries)
+        data_no_id_scaled = scaler.fit_transform(data_no_id)
 
         # Perform k-means clustering
         kmeans = KMeans(n_clusters=num_clusters, n_init=10)
-        data['cluster'] = kmeans.fit_predict(data_no_countries_scaled)
+        data['cluster'] = kmeans.fit_predict(data_no_id_scaled)
 
         for cluster_num in range(num_clusters):
             cluster_data = data[data['cluster'] == cluster_num]
             print(f'\nCluster {cluster_num}:')
-            print(cluster_data[['country', 'cluster']])
+            if dataset_type == "countries":
+                print(cluster_data[['country']])
+            elif dataset_type == "customers":
+                print(cluster_data[['Sex', 'Marital status', 'Age', 'Education', 'Income',
+                                    'Occupation', 'Settlement size']])
+
+    elif dataset_type == "songs":
+        print("songs")
 
 
 num_clusters = 3  # Number of clusters (k)
-apply_kmeans(countries, num_clusters, 1)
+
+apply_kmeans(countries, num_clusters, "countries")
+apply_kmeans(customers, num_clusters, "customers")
+apply_kmeans(songs, num_clusters, "songs")
 
 # Visualize the clusters
 # plt.scatter(X_scaled[:, 0], X_scaled[:, 1], c=data['cluster'], cmap='viridis')
