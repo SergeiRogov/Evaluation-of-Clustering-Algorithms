@@ -62,8 +62,6 @@ dataset using 3 clustering algorithms: K-MEANS, HIERARCHICAL CLUSTERING and DBSC
 '''
 def apply_clustering_algorithms(csv_file, dataset_type):
 
-    num_clusters = 4  # Number of clusters (k)
-
     # Read the CSV file
     data = pd.read_csv(csv_file)
 
@@ -74,6 +72,8 @@ def apply_clustering_algorithms(csv_file, dataset_type):
         === K-MEANS ===
         ===============
         '''
+        num_clusters = 4  # Number of clusters (k)
+
         # Exclude first column since it serves as an identification feature - unique for each instance
         # 'country' column for Countries dataset
         # 'ID' column for Customers dataset
@@ -83,94 +83,152 @@ def apply_clustering_algorithms(csv_file, dataset_type):
         scaler = StandardScaler()
         data_no_id_scaled = scaler.fit_transform(data_no_id)
 
-        # Perform K-Means clustering
-        kmeans = KMeans(n_clusters=num_clusters, n_init=10)
-        cluster_assignments = kmeans.fit_predict(data_no_id_scaled)
+        # # Perform K-Means clustering
+        # kmeans = KMeans(n_clusters=num_clusters, n_init=10)
+        # cluster_assignments = kmeans.fit_predict(data_no_id_scaled)
+        #
+        # # display the results
+        # for cluster_num in range(num_clusters):
+        #     cluster_indices = (cluster_assignments == cluster_num)
+        #     cluster_data = data[cluster_indices]
+        #
+        #     print(f'\nCluster {cluster_num}:')
+        #     if dataset_type == "countries":
+        #         print(cluster_data[['country']])
+        #
+        #     elif dataset_type == "customers":
+        #         print(cluster_data[['Sex', 'Marital status', 'Age', 'Education', 'Income',
+        #                             'Occupation', 'Settlement size']])
+        # '''
+        # ==========================
+        # === K-MEANS EVALUATION ===
+        # ==========================
+        # '''
+        # # within cluster sum of squared errors (WSS)
+        # wss = kmeans.inertia_
+        # print(f"WSS: {wss}")
+        #
+        # # Get cluster assignments
+        # clusters = kmeans.labels_
+        #
+        # bss = calculate_bss(data_no_id_scaled, clusters)
+        # print(f"BSS: {bss}")
+        #
+        # # Elbow Method: determining the appropriate value for k-parameter - number of clusters
+        # wss = {}
+        # bss = {}
+        # # varying number of clusters in range from 1 to 20
+        # for k in range(1, 20):
+        #     # performing K-Means clustering with current number of clusters K
+        #     kmeans = KMeans(n_clusters=k, n_init=10)
+        #     kmeans.fit(data_no_id_scaled)
+        #
+        #     # appending the value of within-cluster sum of squared errors (WSS) for a current k to a list
+        #     wss[k] = kmeans.inertia_
+        #
+        #     clusters = kmeans.labels_
+        #
+        #     # calculating between-cluster sum of squares (BSS) for a current K and appending it to a list
+        #     bss[k] = calculate_bss(data_no_id_scaled, clusters)
+        #
+        # # plotting WSS and BSS on the same graph
+        # plt.figure(figsize=(10, 7))
+        # # plotting WSS
+        # sns.pointplot(x=list(wss.keys()), y=list(wss.values()), color='red', label='WSS')
+        # # plotting BSS
+        # sns.pointplot(x=list(bss.keys()), y=list(bss.values()), color='blue', label='BSS')
+        # plt.grid(True)
+        # plt.xlabel('Number of Clusters (k)')
+        # plt.ylabel('Sum of Squares')
+        # plt.title('Elbow Method for optimal k')
+        # plt.legend()
+        # plt.show()
+        #
+        # '''
+        # ===============================
+        # === HIERARCHICAL CLUSTERING ===
+        # ===============================
+        # '''
+        # # Apply hierarchical clustering
+        # ward_linkage_matrix = linkage(data_no_id_scaled, method='ward', metric='euclidean')
+        #
+        # if dataset_type == "countries":
+        #     height = 15
+        #     labels = data['country'].tolist()
+        # else:
+        #     height = 35
+        #     labels = data['ID'].tolist()
+        #
+        # # Cut the dendrogram and get cluster assignments
+        # clusters = fcluster(ward_linkage_matrix, height, criterion='distance')
+        #
+        # # Plot the dendrogram
+        # plt.figure(figsize=(12, 8))
+        #
+        # dendrogram(ward_linkage_matrix, orientation='top', labels=labels, color_threshold=height)
+        # plt.xlabel('Country' if dataset_type == "countries" else 'Customers')
+        #
+        # plt.title('Hierarchical Clustering Dendrogram')
+        # plt.ylabel('Distance')
+        # plt.show()
+        #
+        # # Display the results for each identified cluster
+        # num_clusters = len(set(clusters))
+        #
+        # for cluster_num in range(1, num_clusters + 1):
+        #     cluster_indices = (clusters == cluster_num)
+        #     cluster_data = data[cluster_indices]
+        #
+        #     print(f'\nCluster {cluster_num}:')
+        #     if dataset_type == "countries":
+        #         print(cluster_data[['country']])
+        #
+        #     elif dataset_type == "customers":
+        #         print(cluster_data[['Sex', 'Marital status', 'Age', 'Education', 'Income',
+        #                             'Occupation', 'Settlement size']])
+        #
+        # '''
+        # ==========================================
+        # === HIERARCHICAL CLUSTERING EVALUATION ===
+        # ==========================================
+        # '''
+        # if dataset_type == "countries":
+        #     heights = [6, 5, 4.5, 4, 2, 8, 15]
+        # else:
+        #     heights = [4, 3.5, 4.3, 2.75, 1.75, 6, 35]
+        #
+        # methods = ['weighted', 'median', 'average', 'centroid', 'single', 'complete', 'ward']
+        # wss = []
+        # bss = []
+        # for i, method in enumerate(methods):
+        #     linkage_matrix = linkage(data_no_id_scaled, method=method, metric='euclidean')
+        #     clusters = fcluster(linkage_matrix, heights[i], criterion='distance')
+        #
+        #     wss.append(calculate_wss(data_no_id_scaled, clusters))
+        #
+        #     bss.append(calculate_bss(data_no_id_scaled, clusters))
+        #
+        # # plotting WSS and BSS on the same graph
+        # plt.figure(figsize=(10, 7))
+        # # plotting WSS
+        # sns.pointplot(x=methods, y=wss, color='red', label='WSS')
+        # # plotting BSS
+        # sns.pointplot(x=methods, y=bss, color='blue', label='BSS')
+        # plt.grid(True)
+        # plt.xlabel('Linkage method')
+        # plt.ylabel('Sum of Squares')
+        # plt.title('WSS and BSS for Different Linkage Methods')
+        # plt.legend()
+        # plt.show()
 
-        # display the results
-        for cluster_num in range(num_clusters):
-            cluster_indices = (cluster_assignments == cluster_num)
-            cluster_data = data[cluster_indices]
-
-            print(f'\nCluster {cluster_num}:')
-            if dataset_type == "countries":
-                print(cluster_data[['country']])
-
-            elif dataset_type == "customers":
-                print(cluster_data[['Sex', 'Marital status', 'Age', 'Education', 'Income',
-                                    'Occupation', 'Settlement size']])
         '''
-        ==========================
-        === K-MEANS EVALUATION ===
-        ==========================
+        ==============
+        === DBSCAN ===
+        ==============
         '''
-        # within cluster sum of squared errors (WSS)
-        wss = kmeans.inertia_
-        print(f"WSS: {wss}")
-
-        # Get cluster assignments
-        clusters = kmeans.labels_
-
-        bss = calculate_bss(data_no_id_scaled, clusters)
-        print(f"BSS: {bss}")
-
-        # Elbow Method: determining the appropriate value for k-parameter - number of clusters
-        wss = {}
-        bss = {}
-        # varying number of clusters in range from 1 to 20
-        for k in range(1, 20):
-            # performing K-Means clustering with current number of clusters K
-            kmeans = KMeans(n_clusters=k, n_init=10)
-            kmeans.fit(data_no_id_scaled)
-
-            # appending the value of within-cluster sum of squared errors (WSS) for a current k to a list
-            wss[k] = kmeans.inertia_
-
-            clusters = kmeans.labels_
-
-            # calculating between-cluster sum of squares (BSS) for a current K and appending it to a list
-            bss[k] = calculate_bss(data_no_id_scaled, clusters)
-
-        # plotting WSS and BSS on the same graph
-        plt.figure(figsize=(10, 7))
-        # plotting WSS
-        sns.pointplot(x=list(wss.keys()), y=list(wss.values()), color='red', label='WSS')
-        # plotting BSS
-        sns.pointplot(x=list(bss.keys()), y=list(bss.values()), color='blue', label='BSS')
-        plt.grid(True)
-        plt.xlabel('Number of Clusters (k)')
-        plt.ylabel('Sum of Squares')
-        plt.title('Elbow Method for optimal k')
-        plt.legend()
-        plt.show()
-
-        '''
-        ===============================
-        === HIERARCHICAL CLUSTERING ===
-        ===============================
-        '''
-        # Apply hierarchical clustering
-        ward_linkage_matrix = linkage(data_no_id_scaled, method='average', metric='euclidean')
-
-        if dataset_type == "countries":
-            height = 15
-            labels = data['country'].tolist()
-        else:
-            height = 35
-            labels = data['ID'].tolist()
-
-        # Cut the dendrogram and get cluster assignments
-        clusters = fcluster(ward_linkage_matrix, height, criterion='distance')
-
-        # Plot the dendrogram
-        plt.figure(figsize=(12, 8))
-
-        dendrogram(ward_linkage_matrix, orientation='top', labels=labels, color_threshold=height)
-        plt.xlabel('Country' if dataset_type == "countries" else 'Customers')
-
-        plt.title('Hierarchical Clustering Dendrogram')
-        plt.ylabel('Distance')
-        plt.show()
+        # Perform DBSCAN clustering
+        dbscan = DBSCAN(eps=2, min_samples=3)
+        clusters = dbscan.fit_predict(data_no_id_scaled)
 
         # Display the results for each identified cluster
         num_clusters = len(set(clusters))
@@ -188,57 +246,55 @@ def apply_clustering_algorithms(csv_file, dataset_type):
                                     'Occupation', 'Settlement size']])
 
         '''
-        ==========================================
-        === HIERARCHICAL CLUSTERING EVALUATION ===
-        ==========================================
-        '''
-        if dataset_type == "countries":
-            heights = [6, 5, 4.5, 4, 2, 8, 15]
-        else:
-            heights = [4, 3.5, 4.3, 2.75, 1.75, 6, 35]
-
-        methods = ['weighted', 'median', 'average', 'centroid', 'single', 'complete', 'ward']
-        wss = []
-        bss = []
-        for i, method in enumerate(methods):
-            linkage_matrix = linkage(data_no_id_scaled, method=method, metric='euclidean')
-            clusters = fcluster(linkage_matrix, heights[i], criterion='distance')
-
-            wss.append(calculate_wss(data_no_id_scaled, clusters))
-
-            bss.append(calculate_bss(data_no_id_scaled, clusters))
-
-        # plotting WSS and BSS on the same graph
-        plt.figure(figsize=(10, 7))
-        # plotting WSS
-        sns.pointplot(x=methods, y=wss, color='red', label='WSS')
-        # plotting BSS
-        sns.pointplot(x=methods, y=bss, color='blue', label='BSS')
-        plt.grid(True)
-        plt.xlabel('Linkage method')
-        plt.ylabel('Sum of Squares')
-        plt.title('WSS and BSS for Different Linkage Methods')
-        plt.legend()
-        plt.show()
-
-        '''
-        ==============
-        === DBSCAN ===
-        ==============
-        '''
-        # Perform DBSCAN clustering
-        dbscan = DBSCAN(eps=0.3, min_samples=5)
-        data['Cluster'] = dbscan.fit_predict(data_no_id_scaled)
-
-        # todo: present results
-
-        '''
         =========================
         === DBSCAN EVALUATION ===
         =========================
         '''
-        # todo: vary eps and min_samples
-        # todo: plot a graph for WSS and BSS on a 3D plane
+        # Varying parameters
+        eps_values = np.linspace(0.1, 2.5, 10)
+        min_samples_values = np.arange(3, 10)
+
+        # Create a meshgrid for eps and min_samples
+        eps_grid, min_samples_grid = np.meshgrid(eps_values, min_samples_values)
+
+        # Initialize an array to store SSE values
+        sse_values = np.zeros_like(eps_grid)
+
+        # Calculate SSE for each combination of eps and min_samples
+        for i in range(eps_grid.shape[0]):
+            for j in range(eps_grid.shape[1]):
+                eps = eps_grid[i, j]
+                min_samples = min_samples_grid[i, j]
+
+                # Perform DBSCAN clustering
+                dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+                clusters = dbscan.fit_predict(data_no_id_scaled)
+
+                # Calculate SSE (sum of distances to core points)
+                core_distances = np.zeros_like(clusters, dtype=float)
+
+                for label in set(clusters):
+                    if label != -1:  # Exclude noise points
+                        cluster_points = data_no_id_scaled[clusters == label]
+                        core_point = np.mean(cluster_points, axis=0)
+                        core_distances[clusters == label] = np.linalg.norm(cluster_points - core_point, axis=1)**2
+
+                sse = np.sum(core_distances)
+                sse_values[i, j] = sse
+
+        # Create a 3D surface plot
+        fig = plt.figure(figsize=(12, 8))
+        ax = fig.add_subplot(111, projection='3d')
+
+        ax.plot_surface(eps_grid, min_samples_grid, sse_values, cmap='viridis')
+
+        # Customize the plot
+        ax.set_xlabel('eps')
+        ax.set_ylabel('min_samples')
+        ax.set_zlabel('SSE')
+        ax.set_title('DBSCAN Clustering SSE with Varying Parameters')
+
+        plt.show()
     # for songs dataset
     elif dataset_type == "songs":
         '''
@@ -246,6 +302,8 @@ def apply_clustering_algorithms(csv_file, dataset_type):
         === K-MEANS ===
         ===============
         '''
+        num_clusters = 4  # Number of clusters (k)
+
         # extract a column with lyrics
         # to perform clustering only considering songs' lyrics
         lyrics_data = data["text"]
